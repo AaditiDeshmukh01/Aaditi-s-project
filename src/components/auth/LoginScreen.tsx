@@ -55,18 +55,12 @@ export default function LoginScreen({ onNavigate }: LoginScreenProps) {
       const { error } = await signIn(cleanEmail, password);
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          setErrorMessage('Invalid email or password. Please check your credentials and try again.');
-        } else if (error.message.includes('Email not confirmed')) {
-          setErrorMessage('Your email has not been confirmed yet. Please check your inbox for the confirmation link.');
-        } else {
-          setErrorMessage(error.message || 'Login failed. Please try again.');
-        }
+        setErrorMessage(error.message || 'Login failed. Please try again.');
       } else {
         onNavigate('dashboard');
       }
-    } catch {
-      setErrorMessage('An unexpected error occurred. Please try again.');
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -3,10 +3,7 @@
 import React, { useState } from 'react';
 import { useExpense } from '@/context/ExpenseContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { TransactionType } from '@/types/expense';
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   Search,
   Home,
   Utensils,
@@ -45,7 +42,7 @@ export default function RecentTransactions({
     return matchesType && matchesSearch;
   });
 
-  const getCategoryIcon = (category: string, type: TransactionType) => {
+  const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'Food':
       case 'Food & Dining':
@@ -76,7 +73,7 @@ export default function RecentTransactions({
     }
   };
 
-  const getCategoryBg = (category: string, type: TransactionType) => {
+  const getCategoryBg = (category: string) => {
     switch (category) {
       case 'Food':
       case 'Food & Dining':
@@ -190,11 +187,10 @@ export default function RecentTransactions({
                 <div className="flex items-center gap-3 min-w-0">
                   <div
                     className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${getCategoryBg(
-                      tx.category,
-                      tx.type
+                      tx.category
                     )}`}
                   >
-                    {getCategoryIcon(tx.category, tx.type)}
+                    {getCategoryIcon(tx.category)}
                   </div>
                   <div className="truncate">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">

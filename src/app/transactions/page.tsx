@@ -10,15 +10,11 @@ import {
   Wallet,
   TrendingUp,
   TrendingDown,
-  Filter,
-  ArrowUpDown,
   Edit3,
   Trash2,
-  Calendar,
   Tag,
   Loader2,
   AlertCircle,
-  CheckCircle2,
   Utensils,
   ShoppingBag,
   Car,
@@ -166,7 +162,7 @@ export default function TransactionsPage() {
       if (error) {
         setActionError(error.message || 'Failed to delete transaction.');
       }
-    } catch (e) {
+    } catch {
       setActionError('An unexpected error occurred while deleting.');
     } finally {
       setDeletingId(null);

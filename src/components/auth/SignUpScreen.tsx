@@ -99,16 +99,7 @@ export default function SignUpScreen({ onNavigate }: SignUpScreenProps) {
       const { user, session, error } = await signUp(cleanEmail, password, cleanName);
 
       if (error) {
-        if (
-          error.message.toLowerCase().includes('already registered') ||
-          error.message.toLowerCase().includes('user already exists')
-        ) {
-          setErrorMessage('An account with this email already exists. Please log in instead.');
-        } else if (error.message.toLowerCase().includes('weak password') || error.message.toLowerCase().includes('at least 6 characters')) {
-          setErrorMessage('Password is too weak. Please use at least 6 characters with a combination of letters and numbers.');
-        } else {
-          setErrorMessage(error.message || 'Failed to create account. Please try again.');
-        }
+        setErrorMessage(error.message || 'Failed to create account. Please try again.');
       } else if (session) {
         // User logged in immediately (email confirmation not mandatory)
         onNavigate('dashboard');
@@ -116,8 +107,8 @@ export default function SignUpScreen({ onNavigate }: SignUpScreenProps) {
         // Email confirmation required by Supabase
         setSuccessMessage('Account registered successfully! Please check your email inbox to verify your account, then log in.');
       }
-    } catch {
-      setErrorMessage('An unexpected error occurred during signup. Please try again.');
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'An unexpected error occurred during signup. Please try again.');
     } finally {
       setIsLoading(false);
     }

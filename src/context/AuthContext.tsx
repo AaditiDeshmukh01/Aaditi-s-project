@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export interface AuthContextType {
   user: User | null;
@@ -16,6 +16,46 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | Error | null }>;
   verifyOtp: (email: string, token: string, type?: 'signup' | 'email' | 'recovery') => Promise<{ session: Session | null; error: AuthError | Error | null }>;
+}
+
+function formatAuthErrorMessage(error: any): string {
+  if (!error) return 'An unexpected error occurred.';
+  const rawMsg = (typeof error === 'string' ? error : error?.message || '').trim();
+  const lower = rawMsg.toLowerCase();
+
+  if (!isSupabaseConfigured()) {
+    return 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel Project Settings and redeploy.';
+  }
+
+  if (
+    lower.includes('failed to fetch') ||
+    lower.includes('fetch failed') ||
+    lower.includes('networkerror') ||
+    lower.includes('network error') ||
+    lower.includes('load failed') ||
+    lower.includes('networkrequestfailed') ||
+    lower.includes('err_name_not_resolved')
+  ) {
+    return 'Unable to connect to the authentication server. Please check your internet connection or verify your Supabase environment variables in Vercel.';
+  }
+
+  if (lower.includes('invalid login credentials') || lower.includes('invalid credentials')) {
+    return 'Invalid email or password. Please check your credentials and try again.';
+  }
+
+  if (lower.includes('email not confirmed')) {
+    return 'Your email has not been confirmed yet. Please check your inbox for the confirmation link.';
+  }
+
+  if (lower.includes('already registered') || lower.includes('user already exists')) {
+    return 'An account with this email already exists. Please log in instead.';
+  }
+
+  if (lower.includes('weak password') || (lower.includes('password') && lower.includes('characters'))) {
+    return 'Password is too weak. Please use at least 6 characters with a combination of letters and numbers.';
+  }
+
+  return rawMsg || 'An error occurred during authentication. Please try again.';
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +73,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize and listen to persistent Supabase session
   useEffect(() => {
     let isMounted = true;
+
+    if (!isSupabaseConfigured()) {
+      console.warn('[AuthContext] Supabase is not configured with valid environment variables.');
+      setIsLoading(false);
+      return;
+    }
 
     async function initializeAuth() {
       try {
@@ -103,6 +149,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sign Up with Email + Password and Full Name metadata
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     setAuthError(null);
+
+    if (!isSupabaseConfigured()) {
+      const msg = 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel Project Settings and redeploy.';
+      const customError = new Error(msg);
+      setAuthError(msg);
+      return { user: null, session: null, error: customError };
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -115,8 +169,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        setAuthError(error.message);
-        return { user: null, session: null, error };
+        const formattedMsg = formatAuthErrorMessage(error);
+        setAuthError(formattedMsg);
+        return { user: null, session: null, error: new Error(formattedMsg) };
       }
 
       // Check if user already exists (Supabase returns empty identities array when user already exists & email confirm is on)
@@ -133,15 +188,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return { user: data.user, session: data.session, error: null };
     } catch (err) {
-      const errorObj = err instanceof Error ? err : new Error('An unexpected error occurred during sign up');
-      setAuthError(errorObj.message);
-      return { user: null, session: null, error: errorObj };
+      const formattedMsg = formatAuthErrorMessage(err);
+      setAuthError(formattedMsg);
+      return { user: null, session: null, error: new Error(formattedMsg) };
     }
   }, []);
 
   // Sign In with Email + Password
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthError(null);
+
+    if (!isSupabaseConfigured()) {
+      const msg = 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel Project Settings and redeploy.';
+      const customError = new Error(msg);
+      setAuthError(msg);
+      return { user: null, session: null, error: customError };
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -149,8 +212,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        setAuthError(error.message);
-        return { user: null, session: null, error };
+        const formattedMsg = formatAuthErrorMessage(error);
+        setAuthError(formattedMsg);
+        return { user: null, session: null, error: new Error(formattedMsg) };
       }
 
       if (data.session) {
@@ -160,9 +224,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return { user: data.user, session: data.session, error: null };
     } catch (err) {
-      const errorObj = err instanceof Error ? err : new Error('An unexpected error occurred during log in');
-      setAuthError(errorObj.message);
-      return { user: null, session: null, error: errorObj };
+      const formattedMsg = formatAuthErrorMessage(err);
+      setAuthError(formattedMsg);
+      return { user: null, session: null, error: new Error(formattedMsg) };
     }
   }, []);
 
@@ -170,7 +234,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(async () => {
     setAuthError(null);
     try {
-      await supabase.auth.signOut();
+      if (isSupabaseConfigured()) {
+        await supabase.auth.signOut();
+      }
       setUser(null);
       setSession(null);
     } catch (err) {
@@ -181,25 +247,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Password reset email
   const resetPassword = useCallback(async (email: string) => {
     setAuthError(null);
+
+    if (!isSupabaseConfigured()) {
+      const msg = 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel Project Settings and redeploy.';
+      const customError = new Error(msg);
+      setAuthError(msg);
+      return { error: customError };
+    }
+
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined,
       });
       if (error) {
-        setAuthError(error.message);
-        return { error };
+        const formattedMsg = formatAuthErrorMessage(error);
+        setAuthError(formattedMsg);
+        return { error: new Error(formattedMsg) };
       }
       return { error: null };
     } catch (err) {
-      const errorObj = err instanceof Error ? err : new Error('Failed to send password reset email');
-      setAuthError(errorObj.message);
-      return { error: errorObj };
+      const formattedMsg = formatAuthErrorMessage(err);
+      setAuthError(formattedMsg);
+      return { error: new Error(formattedMsg) };
     }
   }, []);
 
   // Verify OTP token
   const verifyOtp = useCallback(async (email: string, token: string, type: 'signup' | 'email' | 'recovery' = 'signup') => {
     setAuthError(null);
+
+    if (!isSupabaseConfigured()) {
+      const msg = 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel Project Settings and redeploy.';
+      const customError = new Error(msg);
+      setAuthError(msg);
+      return { session: null, error: customError };
+    }
+
     try {
       const { data, error } = await supabase.auth.verifyOtp({
         email: email.trim(),
@@ -207,8 +290,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         type,
       });
       if (error) {
-        setAuthError(error.message);
-        return { session: null, error };
+        const formattedMsg = formatAuthErrorMessage(error);
+        setAuthError(formattedMsg);
+        return { session: null, error: new Error(formattedMsg) };
       }
       if (data.session) {
         setSession(data.session);
@@ -216,9 +300,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return { session: data.session, error: null };
     } catch (err) {
-      const errorObj = err instanceof Error ? err : new Error('Failed to verify code');
-      setAuthError(errorObj.message);
-      return { session: null, error: errorObj };
+      const formattedMsg = formatAuthErrorMessage(err);
+      setAuthError(formattedMsg);
+      return { session: null, error: new Error(formattedMsg) };
     }
   }, []);
 

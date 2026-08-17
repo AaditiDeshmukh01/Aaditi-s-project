@@ -28,7 +28,7 @@ export function checkSupabaseConfig(): SupabaseConfigStatus {
     }
   }
 
-  let message = 'Supabase environment variables are missing. Please add them to .env.local';
+  let message = 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel Project Settings (or .env.local for local development).';
   if (isConfigured) {
     message = 'Supabase client is configured successfully.';
   } else if (hasUrl && !hasAnonKey) {

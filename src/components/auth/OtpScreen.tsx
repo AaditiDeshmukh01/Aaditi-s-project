@@ -105,9 +105,9 @@ export default function OtpScreen({
       setTimeout(() => {
         onNavigate('dashboard');
       }, 1000);
-    } catch {
+    } catch (err: any) {
       setIsVerifying(false);
-      setErrorMessage('Verification failed. Please try again.');
+      setErrorMessage(err?.message || 'Verification failed. Please try again.');
     }
   };
 

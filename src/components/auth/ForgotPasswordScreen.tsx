@@ -44,8 +44,8 @@ export default function ForgotPasswordScreen({
       } else {
         setIsSent(true);
       }
-    } catch {
-      setErrorMessage('An unexpected error occurred. Please try again.');
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }

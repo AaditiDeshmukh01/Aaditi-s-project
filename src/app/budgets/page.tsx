@@ -171,7 +171,7 @@ export default function BudgetsPage() {
       if (error) {
         setActionError(error.message || 'Failed to delete budget.');
       }
-    } catch (e) {
+    } catch {
       setActionError('An unexpected error occurred while deleting budget.');
     } finally {
       setDeletingId(null);
@@ -377,7 +377,6 @@ export default function BudgetsPage() {
               const rawPercentage = b.amount > 0 ? (b.spent / b.amount) * 100 : 0;
               const displayPercentage = Math.round(rawPercentage);
               const isNearLimit = displayPercentage >= 80 && !isOverBudget;
-              const isUnderBudget = !isOverBudget && !isNearLimit;
 
               let statusText = 'Under Budget';
               let statusBadgeStyle = 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800';

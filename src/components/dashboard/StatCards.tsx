@@ -8,7 +8,6 @@ import {
   PiggyBank,
   TrendingUp,
   TrendingDown,
-  Receipt,
 } from 'lucide-react';
 import { useExpense } from '@/context/ExpenseContext';
 import { useLanguage } from '@/context/LanguageContext';

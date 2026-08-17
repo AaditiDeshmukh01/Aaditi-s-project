@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { HelpCircle, MessageSquare, BookOpen, Mail, ShieldCheck } from 'lucide-react';
+import { HelpCircle, BookOpen, Mail, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function HelpPage() {

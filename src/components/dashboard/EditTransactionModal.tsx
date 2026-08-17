@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Check, Loader2, AlertCircle, Calendar, Tag, FileText, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { X, Check, Loader2, AlertCircle, Calendar, FileText, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { ExpenseCategory, Transaction, TransactionType } from '@/types/expense';
 import { useExpense } from '@/context/ExpenseContext';
 import { useLanguage } from '@/context/LanguageContext';
