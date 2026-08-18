@@ -1,9 +1,14 @@
+import { sanitizeSupabaseUrl } from './client';
+
 export interface SupabaseConfigStatus {
   isConfigured: boolean;
   hasUrl: boolean;
   hasAnonKey: boolean;
   maskedUrl: string | null;
   message: string;
+  isHealthy?: boolean;
+  latencyMs?: number;
+  authEndpointStatus?: string;
 }
 
 /**
@@ -11,7 +16,7 @@ export interface SupabaseConfigStatus {
  * Does not expose the secret or anon key value.
  */
 export function checkSupabaseConfig(): SupabaseConfigStatus {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const url = sanitizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
   const hasUrl = Boolean(url && url.length > 0 && !url.includes('placeholder'));
@@ -44,4 +49,61 @@ export function checkSupabaseConfig(): SupabaseConfigStatus {
     maskedUrl,
     message,
   };
+}
+
+/**
+ * Performs an active network verification against Supabase's live auth health endpoint
+ */
+export async function checkSupabaseLiveConnection(): Promise<SupabaseConfigStatus> {
+  const config = checkSupabaseConfig();
+  if (!config.isConfigured || !config.maskedUrl) {
+    return {
+      ...config,
+      isHealthy: false,
+      authEndpointStatus: 'NOT_CONFIGURED',
+    };
+  }
+
+  const url = sanitizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() || '';
+
+  const startTime = Date.now();
+  try {
+    const res = await fetch(`${url}/auth/v1/health`, {
+      method: 'GET',
+      headers: {
+        apikey: anonKey,
+      },
+      signal: AbortSignal.timeout(4000),
+      cache: 'no-store',
+    });
+
+    const latencyMs = Date.now() - startTime;
+
+    if (res.ok) {
+      return {
+        ...config,
+        isHealthy: true,
+        latencyMs,
+        authEndpointStatus: `ONLINE (${res.status})`,
+        message: `Supabase live connection verified successfully (${latencyMs}ms).`,
+      };
+    } else {
+      return {
+        ...config,
+        isHealthy: false,
+        latencyMs,
+        authEndpointStatus: `HTTP_${res.status}`,
+        message: `Supabase endpoint returned HTTP status ${res.status}.`,
+      };
+    }
+  } catch (err: any) {
+    return {
+      ...config,
+      isHealthy: false,
+      latencyMs: Date.now() - startTime,
+      authEndpointStatus: 'CONNECTION_FAILED',
+      message: `Failed to connect to Supabase: ${err?.message || 'Network error'}`,
+    };
+  }
 }

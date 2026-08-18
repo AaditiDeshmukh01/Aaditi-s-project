@@ -4,10 +4,26 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 let supabaseClient: SupabaseClient | null = null;
 
 /**
+ * Sanitizes Supabase URL by extracting only the origin (protocol + host),
+ * stripping any trailing slashes, /rest/v1, /api, or other accidental subpaths.
+ */
+export function sanitizeSupabaseUrl(rawUrl?: string): string {
+  if (!rawUrl) return '';
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return '';
+  try {
+    const parsed = new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`);
+    return parsed.origin;
+  } catch {
+    return trimmed.replace(/\/+$/, '');
+  }
+}
+
+/**
  * Checks if Supabase client has valid, non-placeholder credentials configured
  */
 export function isSupabaseConfigured(): boolean {
-  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+  const url = sanitizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
   return Boolean(
     url &&
@@ -18,7 +34,7 @@ export function isSupabaseConfigured(): boolean {
 }
 
 export function createClient(): SupabaseClient {
-  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+  const supabaseUrl = sanitizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 
   if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder-project')) {
