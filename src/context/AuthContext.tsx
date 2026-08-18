@@ -16,6 +16,7 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | Error | null }>;
   verifyOtp: (email: string, token: string, type?: 'signup' | 'email' | 'recovery') => Promise<{ session: Session | null; error: AuthError | Error | null }>;
+  resendOtp: (email: string, type?: 'signup' | 'email_change') => Promise<{ error: AuthError | Error | null }>;
 }
 
 function formatAuthErrorMessage(error: any): string {
@@ -306,6 +307,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Resend OTP / verification email
+  const resendOtp = useCallback(async (email: string, type: 'signup' | 'email_change' = 'signup') => {
+    setAuthError(null);
+
+    if (!isSupabaseConfigured()) {
+      const msg = 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel Project Settings and redeploy.';
+      const customError = new Error(msg);
+      setAuthError(msg);
+      return { error: customError };
+    }
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type,
+        email: email.trim(),
+      });
+      if (error) {
+        const formattedMsg = formatAuthErrorMessage(error);
+        setAuthError(formattedMsg);
+        return { error: new Error(formattedMsg) };
+      }
+      return { error: null };
+    } catch (err: any) {
+      const formattedMsg = formatAuthErrorMessage(err);
+      setAuthError(formattedMsg);
+      return { error: new Error(formattedMsg) };
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -319,8 +349,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signOut,
       resetPassword,
       verifyOtp,
+      resendOtp,
     }),
-    [user, session, isLoading, authError, clearError, signUp, signIn, signOut, resetPassword, verifyOtp]
+    [user, session, isLoading, authError, clearError, signUp, signIn, signOut, resetPassword, verifyOtp, resendOtp]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

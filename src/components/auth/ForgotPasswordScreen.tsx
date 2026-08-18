@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 interface ForgotPasswordScreenProps {
-  onNavigate: (screen: AuthScreen) => void;
+  onNavigate: (screen: AuthScreen, email?: string) => void;
 }
 
 export default function ForgotPasswordScreen({

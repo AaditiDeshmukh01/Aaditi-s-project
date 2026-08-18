@@ -6,6 +6,8 @@ export type AuthScreen =
   | 'forgot'
   | 'dashboard';
 
+export type NavigateFunction = (screen: AuthScreen, email?: string) => void;
+
 export interface LoginFormData {
   email: string;
   password: string;

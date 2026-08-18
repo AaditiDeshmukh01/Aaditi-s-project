@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 interface SignUpScreenProps {
-  onNavigate: (screen: AuthScreen) => void;
+  onNavigate: (screen: AuthScreen, email?: string) => void;
 }
 
 export default function SignUpScreen({ onNavigate }: SignUpScreenProps) {
@@ -101,11 +101,11 @@ export default function SignUpScreen({ onNavigate }: SignUpScreenProps) {
       if (error) {
         setErrorMessage(error.message || 'Failed to create account. Please try again.');
       } else if (session) {
-        // User logged in immediately (email confirmation not mandatory)
+        // User logged in immediately (email confirmation disabled)
         onNavigate('dashboard');
       } else if (user) {
-        // Email confirmation required by Supabase
-        setSuccessMessage('Account registered successfully! Please check your email inbox to verify your account, then log in.');
+        // Email confirmation / OTP verification required -> Navigate to OTP screen
+        onNavigate('otp', cleanEmail);
       }
     } catch (err: any) {
       setErrorMessage(err?.message || 'An unexpected error occurred during signup. Please try again.');

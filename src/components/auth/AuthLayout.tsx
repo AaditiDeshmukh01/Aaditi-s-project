@@ -6,7 +6,7 @@ import { Wallet, Sparkles, LayoutDashboard } from 'lucide-react';
 
 interface AuthLayoutProps {
   currentScreen: AuthScreen;
-  onNavigate: (screen: AuthScreen) => void;
+  onNavigate: (screen: AuthScreen, email?: string) => void;
   children: React.ReactNode;
 }
 

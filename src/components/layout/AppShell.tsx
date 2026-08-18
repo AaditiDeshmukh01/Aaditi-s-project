@@ -20,8 +20,16 @@ interface AppShellContentProps {
 function AppShellContent({ children }: AppShellContentProps) {
   const { user, isLoading: isAuthLoading, signOut } = useAuth();
   const [authScreen, setAuthScreen] = useState<AuthScreen>('welcome');
+  const [pendingEmail, setPendingEmail] = useState<string>('');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const handleNavigate = (screen: AuthScreen, email?: string) => {
+    if (email) {
+      setPendingEmail(email);
+    }
+    setAuthScreen(screen);
+  };
 
   // Derive user display name
   const displayName =
@@ -51,7 +59,8 @@ function AppShellContent({ children }: AppShellContentProps) {
     return (
       <AuthContainer
         currentScreen={activeAuthScreen}
-        onNavigate={setAuthScreen}
+        onNavigate={handleNavigate}
+        initialEmail={pendingEmail}
       />
     );
   }
@@ -61,7 +70,8 @@ function AppShellContent({ children }: AppShellContentProps) {
     return (
       <AuthContainer
         currentScreen={authScreen}
-        onNavigate={setAuthScreen}
+        onNavigate={handleNavigate}
+        initialEmail={pendingEmail}
       />
     );
   }

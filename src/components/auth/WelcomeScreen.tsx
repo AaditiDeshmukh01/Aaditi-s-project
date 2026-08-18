@@ -6,7 +6,7 @@ import AuthIllustration from './AuthIllustration';
 import { ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 
 interface WelcomeScreenProps {
-  onNavigate: (screen: AuthScreen) => void;
+  onNavigate: (screen: AuthScreen, email?: string) => void;
 }
 
 export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {

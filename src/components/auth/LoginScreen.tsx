@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 interface LoginScreenProps {
-  onNavigate: (screen: AuthScreen) => void;
+  onNavigate: (screen: AuthScreen, email?: string) => void;
 }
 
 export default function LoginScreen({ onNavigate }: LoginScreenProps) {

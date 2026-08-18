@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 interface OtpScreenProps {
-  onNavigate: (screen: AuthScreen) => void;
+  onNavigate: (screen: AuthScreen, email?: string) => void;
   email?: string;
 }
 
@@ -22,7 +22,7 @@ export default function OtpScreen({
   onNavigate,
   email = '',
 }: OtpScreenProps) {
-  const { verifyOtp, resetPassword } = useAuth();
+  const { verifyOtp, resendOtp } = useAuth();
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const [timeLeft, setTimeLeft] = useState(60);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -93,7 +93,7 @@ export default function OtpScreen({
 
     try {
       if (email) {
-        const { error } = await verifyOtp(email, code);
+        const { error } = await verifyOtp(email, code, 'signup');
         if (error) {
           setErrorMessage(error.message || 'Invalid or expired verification code.');
           setIsVerifying(false);
@@ -120,9 +120,12 @@ export default function OtpScreen({
 
     if (email) {
       try {
-        await resetPassword(email);
-      } catch (e) {
-        console.error('Failed to resend code', e);
+        const { error } = await resendOtp(email, 'signup');
+        if (error) {
+          setErrorMessage(error.message || 'Failed to resend verification code.');
+        }
+      } catch (e: any) {
+        setErrorMessage(e?.message || 'Failed to resend code.');
       }
     }
   };
