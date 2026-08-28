@@ -96,15 +96,15 @@ export default function SignUpScreen({ onNavigate }: SignUpScreenProps) {
     setIsLoading(true);
 
     try {
-      const { user, session, error } = await signUp(cleanEmail, password, cleanName);
+      const { session, error } = await signUp(cleanEmail, password, cleanName);
 
       if (error) {
         setErrorMessage(error.message || 'Failed to create account. Please try again.');
       } else if (session) {
-        // User logged in immediately (email confirmation disabled)
+        // User logged in immediately (email confirmation disabled in Supabase)
         onNavigate('dashboard');
-      } else if (user) {
-        // Email confirmation / OTP verification required -> Navigate to OTP screen
+      } else {
+        // Email confirmation / OTP verification required -> Navigate to existing OTP screen
         onNavigate('otp', cleanEmail);
       }
     } catch (err: any) {

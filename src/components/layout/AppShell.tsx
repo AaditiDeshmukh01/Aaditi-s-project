@@ -18,7 +18,7 @@ interface AppShellContentProps {
 }
 
 function AppShellContent({ children }: AppShellContentProps) {
-  const { user, isLoading: isAuthLoading, signOut } = useAuth();
+  const { user, isLoading: isAuthLoading, signOut, isPasswordRecovery } = useAuth();
   const [authScreen, setAuthScreen] = useState<AuthScreen>('welcome');
   const [pendingEmail, setPendingEmail] = useState<string>('');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -53,7 +53,18 @@ function AppShellContent({ children }: AppShellContentProps) {
     );
   }
 
-  // 2. Unauthenticated: Protect app by rendering Auth Flow
+  // 2. Active Password Recovery Flow: Enforce Set New Password screen
+  if (isPasswordRecovery) {
+    return (
+      <AuthContainer
+        currentScreen="reset-password"
+        onNavigate={handleNavigate}
+        initialEmail={pendingEmail}
+      />
+    );
+  }
+
+  // 3. Unauthenticated: Protect app by rendering Auth Flow
   if (!user) {
     const activeAuthScreen = authScreen === 'dashboard' ? 'welcome' : authScreen;
     return (

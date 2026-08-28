@@ -4,6 +4,7 @@ export type AuthScreen =
   | 'signup'
   | 'otp'
   | 'forgot'
+  | 'reset-password'
   | 'dashboard';
 
 export type NavigateFunction = (screen: AuthScreen, email?: string) => void;

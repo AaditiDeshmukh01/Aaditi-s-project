@@ -8,6 +8,7 @@ import LoginScreen from './LoginScreen';
 import SignUpScreen from './SignUpScreen';
 import OtpScreen from './OtpScreen';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
+import ResetPasswordScreen from './ResetPasswordScreen';
 
 interface AuthContainerProps {
   currentScreen: AuthScreen;
@@ -21,6 +22,12 @@ export default function AuthContainer({
   initialEmail = '',
 }: AuthContainerProps) {
   const [pendingEmail, setPendingEmail] = useState<string>(initialEmail);
+
+  React.useEffect(() => {
+    if (initialEmail) {
+      setPendingEmail(initialEmail);
+    }
+  }, [initialEmail]);
 
   const handleNavigate = (screen: AuthScreen, email?: string) => {
     if (email) {
@@ -41,6 +48,8 @@ export default function AuthContainer({
         return <OtpScreen onNavigate={handleNavigate} email={pendingEmail} />;
       case 'forgot':
         return <ForgotPasswordScreen onNavigate={handleNavigate} />;
+      case 'reset-password':
+        return <ResetPasswordScreen onNavigate={handleNavigate} />;
       default:
         return <WelcomeScreen onNavigate={handleNavigate} />;
     }

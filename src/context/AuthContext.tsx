@@ -9,12 +9,15 @@ export interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isPasswordRecovery: boolean;
+  setIsPasswordRecovery: (val: boolean) => void;
   authError: string | null;
   clearError: () => void;
   signUp: (email: string, password: string, fullName: string) => Promise<{ user: User | null; session: Session | null; error: AuthError | Error | null }>;
   signIn: (email: string, password: string) => Promise<{ user: User | null; session: Session | null; error: AuthError | Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | Error | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
   verifyOtp: (email: string, token: string, type?: 'signup' | 'email' | 'recovery') => Promise<{ session: Session | null; error: AuthError | Error | null }>;
   resendOtp: (email: string, type?: 'signup' | 'email_change') => Promise<{ error: AuthError | Error | null }>;
 }
@@ -65,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const clearError = useCallback(() => {
@@ -79,6 +83,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn('[AuthContext] Supabase is not configured with valid environment variables.');
       setIsLoading(false);
       return;
+    }
+
+    // Check if current URL contains recovery hash/query params
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      const search = window.location.search || '';
+      if (hash.includes('type=recovery') || search.includes('type=recovery')) {
+        setIsPasswordRecovery(true);
+      }
     }
 
     async function initializeAuth() {
@@ -127,9 +140,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth();
 
-    // Subscribe to auth state changes (SIGN_IN, SIGN_OUT, TOKEN_REFRESHED)
+    // Subscribe to auth state changes (SIGN_IN, SIGN_OUT, TOKEN_REFRESHED, PASSWORD_RECOVERY)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       if (!isMounted) return;
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+      }
 
       if (currentSession) {
         setSession(currentSession);
@@ -336,22 +353,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Update Password (authenticated recovery session or account settings)
+  const updatePassword = useCallback(async (newPassword: string) => {
+    setAuthError(null);
+
+    if (!isSupabaseConfigured()) {
+      const msg = 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel Project Settings and redeploy.';
+      const customError = new Error(msg);
+      setAuthError(msg);
+      return { error: customError };
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (error) {
+        const formattedMsg = formatAuthErrorMessage(error);
+        setAuthError(formattedMsg);
+        return { error: new Error(formattedMsg) };
+      }
+      setIsPasswordRecovery(false);
+      return { error: null };
+    } catch (err) {
+      const formattedMsg = formatAuthErrorMessage(err);
+      setAuthError(formattedMsg);
+      return { error: new Error(formattedMsg) };
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
       session,
       isLoading,
       isAuthenticated: Boolean(user && session),
+      isPasswordRecovery,
+      setIsPasswordRecovery,
       authError,
       clearError,
       signUp,
       signIn,
       signOut,
       resetPassword,
+      updatePassword,
       verifyOtp,
       resendOtp,
     }),
-    [user, session, isLoading, authError, clearError, signUp, signIn, signOut, resetPassword, verifyOtp, resendOtp]
+    [
+      user,
+      session,
+      isLoading,
+      isPasswordRecovery,
+      authError,
+      clearError,
+      signUp,
+      signIn,
+      signOut,
+      resetPassword,
+      updatePassword,
+      verifyOtp,
+      resendOtp,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

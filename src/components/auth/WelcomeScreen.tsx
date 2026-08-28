@@ -3,7 +3,7 @@
 import React from 'react';
 import { AuthScreen } from '@/types/auth';
 import AuthIllustration from './AuthIllustration';
-import { ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onNavigate: (screen: AuthScreen, email?: string) => void;
@@ -11,12 +11,12 @@ interface WelcomeScreenProps {
 
 export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
   return (
-    <div className="w-full flex flex-col items-center text-center space-y-6 sm:space-y-8">
+    <div className="w-full flex flex-col items-center text-center space-y-6 sm:space-y-7">
       {/* 1. Finance Illustration */}
       <AuthIllustration />
 
       {/* 2. Headline & Subtitle */}
-      <div className="space-y-3 max-w-sm mx-auto">
+      <div className="space-y-2.5 max-w-sm mx-auto">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
           Welcome to <span className="bg-gradient-to-r from-purple-400 via-violet-300 to-indigo-300 bg-clip-text text-transparent">ExpenseFlow</span>
         </h1>
@@ -33,7 +33,7 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
       </div>
 
       {/* 4. Action Buttons */}
-      <div className="w-full space-y-3 pt-2">
+      <div className="w-full space-y-3 pt-1">
         <button
           onClick={() => onNavigate('login')}
           className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.99] text-white font-bold text-sm sm:text-base shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 transition-all flex items-center justify-center gap-2 group cursor-pointer"
@@ -48,18 +48,6 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
         >
           Skip to Login
         </button>
-      </div>
-
-      {/* 5. Feature Highlights Pills */}
-      <div className="grid grid-cols-2 gap-2.5 w-full pt-2 border-t border-white/5 text-[11px] text-zinc-400">
-        <div className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-zinc-900/50 border border-white/5">
-          <Zap className="w-3.5 h-3.5 text-purple-400" />
-          <span>Real-time Analytics</span>
-        </div>
-        <div className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-zinc-900/50 border border-white/5">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Private & Secure</span>
-        </div>
       </div>
     </div>
   );
