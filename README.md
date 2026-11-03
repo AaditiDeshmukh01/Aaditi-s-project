@@ -3,6 +3,7 @@
 This is a simple web application that helps users keep track of their daily expenses. It makes it easier to manage spending, organize transactions, and set budgets in one place.
 
 Users can easily add, edit, or delete expenses and check where their money is going through a simple and interactive dashboard.
+
 ✨ Features
 
 🔐 User Authentication
