@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 📌 About the Project
 
-## Getting Started
+This is a simple web application that helps users keep track of their daily expenses. It makes it easier to manage spending, organize transactions, and set budgets in one place.
 
-First, run the development server:
+Users can easily add, edit, or delete expenses and check where their money is going through a simple and interactive dashboard.
+✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+🔐 User Authentication
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Allows users to create an account and securely log in to manage their personal financial information. Each user gets access to their own expenses and budgets.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+📊 Interactive Dashboard
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Displays an overview of total expenses, spending summaries, and category-wise financial information. It helps users understand their spending habits through visual charts and summaries.
 
-## Learn More
+💸 Expense Management
 
-To learn more about Next.js, take a look at the following resources:
+Users can add, edit, delete, and view their daily transactions. Each expense can include an amount, category, date, and description.
+🎯 Budget Management
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Allows users to create budgets and set spending limits. Users can monitor their budget usage and check how much money remains.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+📈 Expense Analytics
 
-## Deploy on Vercel
+Provides visual representations of expense data to help users understand their spending patterns. Users can view category-wise and monthly expense information.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+🎨 Responsive User Interface
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Features a clean and modern interface with easy navigation and responsive layouts. Supports dark and light themes for a comfortable user experience.
+
+## 🛠️ Tech Stack
+
+**Frontend:** Next.js • React.js • TypeScript • Tailwind CSS • shadcn/ui • Lucide React
+
+**Backend & Database:** Supabase • Supabase Auth • PostgreSQL • Row Level Security (RLS)
+
+**Libraries:** Recharts • React Hook Form • Zod • Sonner
+
+👩‍💻 Developer
+
+Aaditi Deshmukh
