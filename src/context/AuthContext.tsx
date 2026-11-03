@@ -24,13 +24,22 @@ export interface AuthContextType {
 
 function formatAuthErrorMessage(error: any): string {
   if (!error) return 'An unexpected error occurred.';
-  const rawMsg = (typeof error === 'string' ? error : error?.message || '').trim();
+
+  // Extract the deepest message — Node 18+ fetch wraps OS errors in error.cause
+  const rawMsg = (
+    typeof error === 'string'
+      ? error
+      : (error?.cause as any)?.message || error?.message || ''
+  ).trim();
   const lower = rawMsg.toLowerCase();
 
   if (!isSupabaseConfigured()) {
     return 'Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel Project Settings and redeploy.';
   }
 
+  // Network / connectivity failure — env vars are confirmed set, so the most
+  // likely cause is the Supabase project being paused (free-tier inactivity)
+  // or a temporary outage, NOT missing env vars.
   if (
     lower.includes('failed to fetch') ||
     lower.includes('fetch failed') ||
@@ -38,9 +47,31 @@ function formatAuthErrorMessage(error: any): string {
     lower.includes('network error') ||
     lower.includes('load failed') ||
     lower.includes('networkrequestfailed') ||
-    lower.includes('err_name_not_resolved')
+    lower.includes('err_name_not_resolved') ||
+    lower.includes('econnrefused') ||
+    lower.includes('enotfound') ||
+    lower.includes('connection refused')
   ) {
-    return 'Unable to connect to the authentication server. Please check your internet connection or verify your Supabase environment variables in Vercel.';
+    if (typeof window !== 'undefined') {
+      // Safe diagnostic log — no secrets, just the masked origin
+      const maskedUrl = (() => {
+        try {
+          return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '').origin;
+        } catch {
+          return '(masked)';
+        }
+      })();
+      console.warn(
+        '[Auth] Network error reaching Supabase endpoint.',
+        'Supabase URL (masked):', maskedUrl,
+        '| Raw error:', rawMsg || String(error)
+      );
+    }
+    return (
+      'Unable to reach the authentication server. ' +
+      'Your Supabase project may be paused (free-tier projects pause after inactivity). ' +
+      'Please visit your Supabase dashboard to resume the project, then try again.'
+    );
   }
 
   if (lower.includes('invalid login credentials') || lower.includes('invalid credentials')) {

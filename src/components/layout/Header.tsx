@@ -6,7 +6,6 @@ import {
   Bell,
   Plus,
   Menu,
-  Calendar,
   X,
   Sun,
   Moon,
@@ -188,11 +187,6 @@ export default function Header({
 
         {/* Right Section: Actions, Language Switcher, Theme Switcher, Notifications, Add Button */}
         <div className="flex items-center gap-1.5 sm:gap-3">
-          {/* Quick Date Badge */}
-          <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
-            <Calendar className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-            <span>August 2026</span>
-          </div>
 
           {/* 1. Language Switcher Dropdown */}
           <div className="relative">

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import Link from 'next/link';
 import { useExpense } from '@/context/ExpenseContext';
 import { useLanguage } from '@/context/LanguageContext';
 import {
@@ -70,10 +71,13 @@ export default function BudgetProgress() {
               {t('budgetsSubtitle')}
             </p>
           </div>
-          <button className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer">
+          <Link
+            href="/budgets"
+            className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
+          >
             <Plus className="w-3.5 h-3.5" />
             <span>{t('newBudget')}</span>
-          </button>
+          </Link>
         </div>
 
         {budgetsWithSpent.length === 0 ? (
@@ -147,10 +151,13 @@ export default function BudgetProgress() {
               {t('goalsSubtitle')}
             </p>
           </div>
-          <button className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer">
+          <Link
+            href="/savings-goals"
+            className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
+          >
             <Plus className="w-3.5 h-3.5" />
             <span>{t('newGoal')}</span>
-          </button>
+          </Link>
         </div>
 
         {savingsGoals.length === 0 ? (

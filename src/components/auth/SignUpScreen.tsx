@@ -1,3 +1,5 @@
+
+
 'use client';
 
 import React, { useState } from 'react';
@@ -104,8 +106,8 @@ export default function SignUpScreen({ onNavigate }: SignUpScreenProps) {
         // User logged in immediately (email confirmation disabled in Supabase)
         onNavigate('dashboard');
       } else {
-        // Email confirmation / OTP verification required -> Navigate to existing OTP screen
-        onNavigate('otp', cleanEmail);
+        // Email confirmation disabled in Supabase - go directly to login
+        onNavigate('login');
       }
     } catch (err: any) {
       setErrorMessage(err?.message || 'An unexpected error occurred during signup. Please try again.');
